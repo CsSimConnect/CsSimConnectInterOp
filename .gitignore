@@ -1,0 +1,7 @@
+# Don't store IDE files
+.vs/
+.vscode/
+
+# Don't store build artifacts
+bin/
+out/
