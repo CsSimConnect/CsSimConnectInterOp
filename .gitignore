@@ -5,3 +5,6 @@
 # Don't store build artifacts
 bin/
 out/
+x64/
+x86/
+packages/

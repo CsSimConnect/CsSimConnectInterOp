@@ -5,12 +5,12 @@ The intent is to keep it as thin as possible, but provide useful logging and tra
 
 ## Building the InterOp DLL
 
-This project requires `cmake` to be installed together with Visual Studio 2022 (Community edition).
+This project requires Visual Studio 2022 (Community edition) to be installed.
 
 ## Function interfaces and DLL exports
 
 A DLL in Windows is essentially an executable with a customized entry point defined in the
-[`dllmain.cpp`](./dllmain.cpp) module. This entry point (called "`dllmain`") differs from the usual "`main()`"
+[`dllmain.cpp`](src/dllmain.cpp) module. This entry point (called "`dllmain`") differs from the usual "`main()`"
 function in that it receives information on the sharing mode under which it was invoked, which can involve
 a new process or a new thread, and wether it is an "attach" or "detach" event. Once attached, the client
 process (or thread) can call the library's exported functions by name or number.

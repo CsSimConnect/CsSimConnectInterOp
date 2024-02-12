@@ -17,7 +17,7 @@
 #include <mutex>
 #include <format>
 
-static nl::rakis::Logger logger{ nl::rakis::Logger::getLogger("CsSimConnectInterOp") };
+static nl::rakis::logging::Logger logger{ nl::rakis::logging::Logger::getLogger("CsSimConnectInterOp") };
 
 static bool logInitialized{ false };
 
@@ -25,7 +25,7 @@ void initLog() {
 	if (!logInitialized) {
 		std::filesystem::path logConfig("rakisLog2.properties");
 		if (std::filesystem::exists(logConfig)) {
-			nl::rakis::Logger::configure(logConfig.string());
+			//nl::rakis::logging::Configurer::configure(logConfig.string());
 		}
 		logInitialized = true;
 	}

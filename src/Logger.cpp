@@ -1,6 +1,6 @@
 #include "pch.h"
 /*
- * Copyright (c) 2021. Bert Laverman
+ * Copyright (c) 2021-2024. Bert Laverman
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,65 +32,26 @@
 
 #include "Log.h"
 
-using namespace nl::rakis;
+using namespace nl::rakis::logging;
 
 namespace fs = std::filesystem;
 
 
-constexpr const char* CFG_SEPARATOR{"."};
-constexpr const char* CFG_ROOTLOGGER{"rootLogger"};
-constexpr const char* CFG_FILENAME{"filename"};
-constexpr const char* CFG_LOGGER{"logger"};
 
-constexpr const char* CFG_STDOUT{"STDOUT"};
-constexpr const char* CFG_STDERR{"STDERR"};
-
-constexpr const char* CFG_LEVEL_TRACE{"TRACE"};
-constexpr const char* CFG_LEVEL_DEBUG{"DEBUG"};
-constexpr const char* CFG_LEVEL_INFO{"INFO"};
-constexpr const char* CFG_LEVEL_WARN{"WARN"};
-constexpr const char* CFG_LEVEL_ERROR{"ERROR"};
-constexpr const char* CFG_LEVEL_FATAL{"FATAL"};
-constexpr const char* CFG_LEVEL_INIT{"INIT"};
-
-
-/*static*/ Logger::LoggerNode Logger::targets_(
-	CFG_ROOTLOGGER,
-	"",
-	"",
-	std::make_unique<std::ostream>(std::cerr.rdbuf()),
-	LOGLVL_INFO
-);
-
-/*static*/ bool Logger::configDone_{ false };
-
-
-inline std::string strip(const std::string& s) {
-	auto first = s.find_first_not_of(" \t");\
-	if (first == std::string::npos) {
-		return std::string();
-	}
-	auto last = s.find_last_not_of(" \t");
-	return s.substr(first, (last - first + 1));
-}
-
-inline std::string strip(const std::string_view& s) {
-	auto first = s.find_first_not_of(" \t");\
-	if (first == std::string::npos) {
-		return std::string();
-	}
-	auto last = s.find_last_not_of(" \t");
-	return std::string(s[first], s[(last - first + 1)]);
-}
-
-inline std::tuple<std::string, std::string> split(const std::string& s, const std::string& sep)
+/*static*/ std::string Logger::formatLine(LogLevel level, const std::string name, const std::string msg)
 {
-	auto pos = s.find(sep);
-	if (pos == std::string::npos) {
-		return std::make_tuple(s, std::string());
-	}
-	return std::make_tuple(strip(s.substr(0, pos)), strip(s.substr(pos + sep.length())));
+	time_t tt(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+	tm ti;
+
+	localtime_s(&ti, &tt);
+
+	return std::format("{:04}-{:02}-{:02} {:02}:{:02}:{:02} [{:<5}] {} {}",
+		ti.tm_year + 1900, ti.tm_mon + 1, ti.tm_mday,
+		ti.tm_hour, ti.tm_min, ti.tm_sec,
+		LOGLVL_NAME[level],
+		name, msg);
 }
+
 
 static std::string join(std::vector<std::string>::const_iterator begin, std::vector<std::string>::const_iterator end, std::string sep)
 {
@@ -109,81 +70,55 @@ static std::string join(std::vector<std::string>::const_iterator begin, std::vec
 Logger::Logger(const std::string& name)
 	: name_(name)
 {
-	level_ = getLevel(name);
+	level_ = configuration().getLevel(name);
 }
 
-Logger::~Logger()
-{
 
-}
-
-Logger::Level nl::rakis::Logger::getLevel()
+LogLevel Logger::getLevel()
 {
 	if (level_ == LOGLVL_INIT) {
-		// Check if we're still uninitialized
-		if (configDone_) {
-			level_ = getLevel(name_);
-		}
+		level_ = configuration().getLevel(name_);
 	}
 	return level_;
 }
 
-
-Logger::LoggerNode& getTarget(Logger::LoggerNode& root, std::string const& name, bool create = false) {
-	auto [head, tail] = split(name, CFG_SEPARATOR);
-	if (head.empty()) {
-		return root;
-	} else if (root.children.find(head) == root.children.end()) {
-		if (create) {
-			root.children[head] = Logger::LoggerNode(head, root.fullName + CFG_SEPARATOR + head);
-		} else {
-			return root;
-		}
-	}
-	return getTarget(root.children[head], tail);
-}
-
-/*static*/ Logger::LoggerNode& Logger::getTarget(std::string const& name, bool create)
-{
-	return ::getTarget(targets_, name);
-}
-
-
-constexpr const char* LOGLVL_NAME[] = {
-	CFG_LEVEL_INIT, CFG_LEVEL_TRACE, CFG_LEVEL_DEBUG, CFG_LEVEL_INFO, CFG_LEVEL_WARN, CFG_LEVEL_ERROR, CFG_LEVEL_FATAL
-};
-
-Logger::Level valueOf(const std::string& name)
+static LogLevel valueOf(const std::string& name)
 {
 	if (name == CFG_LEVEL_TRACE) {
-		return Logger::LOGLVL_TRACE;
+		return LOGLVL_TRACE;
 	}
 	else if (name == CFG_LEVEL_DEBUG) {
-		return Logger::LOGLVL_DEBUG;
+		return LOGLVL_DEBUG;
 	}
 	else if (name == CFG_LEVEL_INFO) {
-		return Logger::LOGLVL_INFO;
+		return LOGLVL_INFO;
 	}
 	else if (name == CFG_LEVEL_WARN) {
-		return Logger::LOGLVL_WARN;
+		return LOGLVL_WARN;
 	}
 	else if (name == CFG_LEVEL_ERROR) {
-		return Logger::LOGLVL_ERROR;
+		return LOGLVL_ERROR;
 	}
 	else if (name == CFG_LEVEL_FATAL) {
-		return Logger::LOGLVL_FATAL;
+		return LOGLVL_FATAL;
 	}
-	return Logger::LOGLVL_INIT;
+	return LOGLVL_INIT;
 }
 
-/*static*/ void Logger::configure(std::string const& configFile)
+
+/*static*/ void Configurer::logRoot(LogLevel level, const std::string& msg)
+{
+	std::cerr << Logger::formatLine(level, CFG_ROOTLOGGER, msg) << std::endl;
+}
+
+/*static*/ void Configurer::configure(std::string const& configFile)
 {
 	std::filesystem::path file(configFile);
 	if (std::filesystem::exists(file)) {
 		std::ifstream cfg(file);
 
 		if (!cfg) {
-			root() << std::format("Cannot open configuration file '{}'\n", configFile);
+			Configurer::rootLogger(LOGLVL_ERROR, std::format("Cannot open configuration file '{}'\n", configFile));
 			return;
 		}
 
@@ -195,56 +130,40 @@ Logger::Level valueOf(const std::string& name)
 			auto [name, value] = split(line, "=");
 
 			if (name.empty() || value.empty()) {
-				root() << std::format("Ignoring line '{}' in '{}'\n", line, configFile);
+				Configurer::rootLogger(LOGLVL_ERROR, std::format("Ignoring line '{}' in '{}'\n", line, configFile));
 				continue;
 			}
 
 			if (name == CFG_ROOTLOGGER) {
 				if (value.empty()) {
-					root() << "Ignoring empty value for 'rootLogger'\n";
+					Configurer::rootLogger(LOGLVL_ERROR, "Ignoring empty value for 'rootLogger'\n");
 					continue;
 				}
 				auto [level, target] = split(value, ",");
-				targets_.level = valueOf(level);
+				targets().level_ = valueOf(level);
 				if (!target.empty()) {
-					targets_.filename = target;
-					targets_.stream = std::make_unique<std::ofstream>(target, std::ios_base::out | std::ios_base::app);
+					targets().filename_ = target;
+					targets().logger_ = [target, name](LogLevel level, const std::string& msg) mutable {
+						auto f = std::ofstream(target, std::ios_base::out | std::ios_base::app);
+						f << Logger::formatLine(level, name, msg) << std::endl;
+					};
 				}
 				continue;
 			}
 			auto& node = getTarget(name, true);
 			auto [level, target] = split(value, ",");
-			node.level = valueOf(level);
+			node.level_ = valueOf(level);
 			if (!target.empty()) {
-				node.filename = target;
-				node.stream = std::make_unique<std::ofstream>(target, std::ios_base::out | std::ios_base::app);
+				node.filename_ = target;
+				node.logger_ = [target, name](LogLevel level, const std::string& msg) mutable {
+					auto f = std::ofstream(target, std::ios_base::out | std::ios_base::app);
+					f << Logger::formatLine(level, name, msg) << std::endl;
+				};
 			}
 		}
-		configDone_ = true;
-		root() << std::format("Logging initialized. Root log threshold '{}'\n", LOGLVL_NAME [targets_.level]) << std::flush;
-		Logger logger{ getLogger("CsSimConnectInterOp") };
-		root() << std::format("getLevel(): '{}', trace is {}\n", LOGLVL_NAME[logger.getLevel()], logger.isTraceEnabled() ? "enabled" : "disabled") << std::flush;
+		configDone() = true;
+		rootLogger(LOGLVL_ERROR, std::format("Logging initialized. Root log threshold '{}'\n", LOGLVL_NAME [targets().level_]));
+		Logger logger{ Logger::getLogger("CsSimConnectInterOp") };
+		rootLogger(LOGLVL_ERROR, std::format("getLevel(): '{}', trace is {}\n", LOGLVL_NAME[logger.getLevel()], logger.isTraceEnabled() ? "enabled" : "disabled"));
 	}
-}
-
-static void num(std::ostream& s, int i)
-{
-	if (i >= 100) {
-		s << char('0' + ((i / 1000) % 10)) << char('0' + ((i / 100) % 10)) << char('0' + ((i / 10) % 10)) << char('0' + (i % 10));
-	}
-	else {
-		s << char('0' + ((i / 10) % 10)) << char('0' + (i % 10));
-	}
-}
-
-void Logger::startLine(std::ostream& s, Level level)
-{
-	time_t tt(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
-	tm ti;
-
-	localtime_s(&ti, &tt);
-
-	num(s, ti.tm_year + 1900); s << '-'; num(s, ti.tm_mon + 1); s << '-'; num(s, ti.tm_mday); s << " ";
-	num(s, ti.tm_hour); s << ':'; num(s, ti.tm_min); s << ':'; num(s, ti.tm_sec);
-	s << std::format(" [{:<5}] {} ", LOGLVL_NAME [level], name_);
 }
