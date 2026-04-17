@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-#include "framework.h"
+
 #include <SimConnect.h>
+#include <stdint.h>
 
 // The MSFS SDK adds defines for several C++ keywords
 #if defined(SIMCONNECT_ENUM)
@@ -31,6 +32,7 @@
 
 #endif
 
+#define CS_SIMCONNECT_DLL_EXPORT_VOID	extern "C" __declspec(dllexport) void
 #define CS_SIMCONNECT_DLL_EXPORT_LONG	extern "C" __declspec(dllexport) int64_t
 #define CS_SIMCONNECT_DLL_EXPORT_BOOL	extern "C" __declspec(dllexport) bool
 
@@ -56,9 +58,18 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsSetNotificationGroupPriority(HANDLE handle, uint
 CS_SIMCONNECT_DLL_EXPORT_LONG CsSubscribeToSystemEvent(HANDLE handle, int id, const char* eventName);
 CS_SIMCONNECT_DLL_EXPORT_LONG CsRequestSystemState(HANDLE handle, int id, const char* eventName);
 
+#if IS_PREPAR3D
 CS_SIMCONNECT_DLL_EXPORT_LONG CsRequestDataOnSimObject(HANDLE handle, uint32_t requestId, uint32_t defId, uint32_t objectId, uint32_t period, uint32_t dataRequestFlags,
-													   DWORD origin, DWORD interval, DWORD limit);
+	DWORD origin, DWORD interval, DWORD limit);
+#else
+CS_SIMCONNECT_DLL_EXPORT_LONG CsRequestDataOnSimObject(HANDLE handle, uint32_t requestId, uint32_t defId, uint32_t objectId, uint32_t period, uint32_t dataRequestFlags =0,
+	DWORD origin =0, DWORD interval =0, DWORD limit =0);
+#endif
+#if IS_PREPAR3D
 CS_SIMCONNECT_DLL_EXPORT_LONG CsRequestDataOnSimObjectType(HANDLE handle, uint32_t requestId, uint32_t defId, uint32_t radius, uint32_t objectType);
+#else
+CS_SIMCONNECT_DLL_EXPORT_LONG CsRequestDataOnSimObjectType(HANDLE handle, uint32_t requestId, uint32_t defId, uint32_t radius, uint32_t objectType);
+#endif
 CS_SIMCONNECT_DLL_EXPORT_LONG CsSetDataOnSimObject(HANDLE handle, uint32_t defId, uint32_t objectId, uint32_t flags, uint32_t count, uint32_t unitSize, void* data);
 CS_SIMCONNECT_DLL_EXPORT_LONG CsAddToDataDefinition(HANDLE handle, uint32_t defId, const char* datumName, const char* UnitsName, uint32_t datumType, float epsilon, uint32_t datumId);
 CS_SIMCONNECT_DLL_EXPORT_LONG CsClearDataDefinition(HANDLE handle, uint32_t defineId);

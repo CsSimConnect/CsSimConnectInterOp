@@ -10,23 +10,11 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\CsSimConnectInterOp.cpp" />
-    <ClCompile Include="src\dllmain.cpp" />
-    <ClCompile Include="src\Logger.cpp" />
-    <ClCompile Include="src\pch.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\CsSimConnectInterOp.h" />
-    <ClInclude Include="src\framework.h" />
-    <ClInclude Include="src\Log.h" />
-    <ClInclude Include="src\pch.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{e20e66c5-7a8f-4db9-9a7f-f1d8b50b50a8}</ProjectGuid>
-    <RootNamespace>CsSimConnectInterOp</RootNamespace>
+    <ProjectGuid>{9db16c52-f52a-4e33-8629-f6dcad4d690c}</ProjectGuid>
+    <RootNamespace>CsSimConnectInterOpMock</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -59,7 +47,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;CSSIMCONNECTINTEROP_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;CSSIMCONNECTINTEROPMOCK_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -81,7 +69,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;CSSIMCONNECTINTEROP_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;CSSIMCONNECTINTEROPMOCK_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -99,6 +87,22 @@
       <AdditionalDependencies>SimConnect.lib;shlwapi.lib;user32.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="mock\CsSimConnectInterOpMock.h" />
+    <ClInclude Include="mock\framework.h" />
+    <ClInclude Include="mock\pch.h" />
+    <ClInclude Include="src\CsSimConnectInterOp.h" />
+    <ClInclude Include="src\Log.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="mock\CsSimConnectInterOpMock.cpp" />
+    <ClCompile Include="mock\dllmain.cpp" />
+    <ClCompile Include="mock\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\Logger.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

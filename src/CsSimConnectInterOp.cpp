@@ -42,7 +42,7 @@ CS_SIMCONNECT_DLL_EXPORT_BOOL CsConnect(const char* appName, HANDLE& handle) {
 	logger.info(std::format("Trying to connect through SimConnect using client name '{}'", appName));
 	HANDLE h;
 
-//	std::unique_lock<std::mutex> scLock(scMutex);
+//	std::scoped_lock<std::mutex> scLock(scMutex);
 	HRESULT hr = SimConnect_Open(&h, appName, nullptr, 0, nullptr, 0);
 
 	if (SUCCEEDED(hr)) {
@@ -61,7 +61,7 @@ CS_SIMCONNECT_DLL_EXPORT_BOOL CsConnect(const char* appName, HANDLE& handle) {
 CS_SIMCONNECT_DLL_EXPORT_BOOL CsDisconnect(HANDLE handle) {
 	initLog();
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	HRESULT hr = SimConnect_Close(handle);
 
 	if (hr != E_FAIL) {
@@ -113,7 +113,7 @@ CS_SIMCONNECT_DLL_EXPORT_BOOL CsGetNextDispatch(HANDLE handle, DispatchProc call
  * Utilities
  */
 
-long fetchSendId(HANDLE handle, HRESULT hr, const char* api)
+static long fetchSendId(HANDLE handle, HRESULT hr, const char* api)
 {
 	DWORD sendId{ 0 };
 
@@ -138,7 +138,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsAddClientEventToNotificationGroup(HANDLE handle,
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_AddClientEventToNotificationGroup(handle, groupId, eventId, maskable), "AddClientEventToNotificationGroup");
 }
 
@@ -151,7 +151,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsMapClientEventToSimEvent(HANDLE handle, uint32_t
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_MapClientEventToSimEvent(handle, eventId, eventName), "MapClientEventToSimEvent");
 }
 
@@ -164,7 +164,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsMapInputEventToClientEvent(HANDLE handle, uint32
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_MapInputEventToClientEvent(handle, groupId, inputDefinition, downEventId, downValue, upEventId, upValue, maskable), "MapInputEventToClientEvent");
 }
 
@@ -177,7 +177,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsRemoveClientEvent(HANDLE handle, uint32_t groupI
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_RemoveClientEvent(handle, groupId, eventId), "RemoveClientEvent");
 }
 
@@ -190,7 +190,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsTransmitClientEvent(HANDLE handle, uint32_t obje
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_TransmitClientEvent(handle, objectId, eventId, data, groupId, flags), "TransmitClientEvent");
 }
 
@@ -205,7 +205,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsTransmitClientEvent64(HANDLE handle, uint32_t ob
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_TransmitClientEvent64(handle, objectId, eventId, data, groupId, flags), "TransmitClientEvent");
 }
 
@@ -225,7 +225,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsAddToClientDataDefinition(HANDLE handle, uint32_
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_AddToClientDataDefinition(handle, defId, offset, sizeOrType, epsilon, datumId), "AddToClientDataDefinition");
 }
 
@@ -239,7 +239,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsCreateClientData(HANDLE handle, uint32_t clientD
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_CreateClientData(handle, clientDataId, size, flags), "CreateClientData");
 }
 
@@ -252,7 +252,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsMapClientDataNameToID(HANDLE handle, const char*
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_MapClientDataNameToID(handle, clientDataName, clientDataId), "MapClientDataNameToID");
 }
 
@@ -266,7 +266,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsRequestClientData(HANDLE handle, uint32_t client
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_RequestClientData(handle, clientDataId, requestId, defineId, SIMCONNECT_CLIENT_DATA_PERIOD(period), flags, origin, interval, limit), "RequestClientData");
 }
 
@@ -279,7 +279,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsSetClientData(HANDLE handle, uint32_t clientData
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_SetClientData(handle, clientDataId, defineId, flags, 0, unitSize, dataSet), "SetClientData");
 }
 
@@ -292,7 +292,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsClearClientDataDefinition(HANDLE handle, uint32_
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_ClearClientDataDefinition(handle, clientDataId), "ClearClientDataDefinition");
 }
 
@@ -309,7 +309,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsClearNotificationGroup(HANDLE handle, uint32_t g
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_ClearNotificationGroup(handle, groupId), "ClearNotificationGroup");
 }
 
@@ -322,7 +322,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsRequestNotificationGroup(HANDLE handle, uint32_t
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_RequestNotificationGroup(handle, groupId), "RequestNotificationGroup");
 }
 
@@ -335,7 +335,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsSetNotificationGroupPriority(HANDLE handle, uint
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_SetNotificationGroupPriority(handle, groupId, priority), "SetNotificationGroupPriority");
 }
 
@@ -352,7 +352,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsSubscribeToSystemEvent(HANDLE handle, int eventI
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_SubscribeToSystemEvent(handle, eventId, eventName), "SubScribeToSystemEvent");
 }
 
@@ -365,7 +365,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsRequestSystemState(HANDLE handle, int requestId,
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_RequestSystemState(handle, requestId, eventName), "RequestSystemState");
 }
 
@@ -380,7 +380,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsRequestDataOnSimObject(HANDLE handle, uint32_t r
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_RequestDataOnSimObject(handle, requestId, defId, objectId, SIMCONNECT_PERIOD(period), dataRequestFlags, origin, interval, limit), "RequestDataOnSimObject");
 }
 
@@ -393,7 +393,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsRequestDataOnSimObjectType(HANDLE handle, uint32
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_RequestDataOnSimObjectType(handle, requestId, defineId, radius, SIMCONNECT_SIMOBJECT_TYPE(objectType)), "RequestDataOnSimObjectType");
 }
 
@@ -407,7 +407,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsSetDataOnSimObject(HANDLE handle, uint32_t defId
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_SetDataOnSimObject(handle, defId, objectId, flags, count, unitSize, data), "SetDataOnSimObject");
 }
 
@@ -424,7 +424,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsAddToDataDefinition(HANDLE handle, uint32_t defI
 	if ((unitsName != nullptr) && (strcmp(unitsName, "NULL") == 0)) {
 		unitsName = nullptr;
 	}
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_AddToDataDefinition(handle, defId, datumName, unitsName, SIMCONNECT_DATATYPE(datumType), epsilon, datumId), "AddToDataDefinition");
 }
 
@@ -438,7 +438,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsClearDataDefinition(HANDLE handle, uint32_t defi
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_ClearDataDefinition(handle, defineId), "ClearDataDefinition");
 }
 
@@ -456,7 +456,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsAICreateEnrouteATCAircraft(HANDLE handle, const 
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_AICreateEnrouteATCAircraft(handle, title, tailNumber, flightNumber, flightPlanPath, flightPlanPosition, touchAndGo, requestId), "AICreateEnrouteATCAircraft");
 }
 
@@ -472,7 +472,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsAICreateEnrouteATCAircraftW(HANDLE handle, const
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_AICreateEnrouteATCAircraftW(handle, title, tailNumber, flightNumber, flightPlanPath, flightPlanPosition, touchAndGo, requestId), "AICreateEnrouteATCAircraft");
 }
 
@@ -498,7 +498,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsAICreateNonATCAircraft(HANDLE handle, const char
 	initPos.OnGround = onGround;
 	initPos.Airspeed = airspeed;
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_AICreateNonATCAircraft(handle, title, tailNumber, initPos, requestId), "AICreateNonATCAircraft");
 }
 
@@ -512,7 +512,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsAICreateParkedATCAircraft(HANDLE handle, const c
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_AICreateParkedATCAircraft(handle, title, tailNumber, airportId, requestId), "AICreateParkedATCAircraft");
 }
 
@@ -536,7 +536,7 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsAICreateSimulatedObject(HANDLE handle, const cha
 	initPos.OnGround = onGround;
 	initPos.Airspeed = airspeed;
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_AICreateSimulatedObject(handle, title, initPos, requestId), "AICreateSimulatedObject");
 }
 
@@ -550,6 +550,6 @@ CS_SIMCONNECT_DLL_EXPORT_LONG CsAIRemoveObject(HANDLE handle, uint32_t objectId,
 		return FALSE;
 	}
 
-	std::unique_lock<std::mutex> scLock(scMutex);
+	std::scoped_lock<std::mutex> scLock(scMutex);
 	return fetchSendId(handle, SimConnect_AIRemoveObject(handle, objectId, requestId), "AIRemoveObject");
 }

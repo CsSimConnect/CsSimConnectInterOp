@@ -17,13 +17,12 @@
 #ifndef PCH_H
 #define PCH_H
 
- // add headers that you want to pre-compile here
+// add headers that you want to pre-compile here
 #include "framework.h"
 
 #include "../src/CsSimConnectInterOp.h"
+#include "CsSimConnectInterOpMock.h"
 
 #include "../src/Log.h"
-
-#include "gtest/gtest.h"
 
 #endif //PCH_H

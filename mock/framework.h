@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (c) 2024. Bert Laverman
  *
@@ -14,16 +15,6 @@
  * limitations under the License.
  */
 
-#ifndef PCH_H
-#define PCH_H
-
- // add headers that you want to pre-compile here
-#include "framework.h"
-
-#include "../src/CsSimConnectInterOp.h"
-
-#include "../src/Log.h"
-
-#include "gtest/gtest.h"
-
-#endif //PCH_H
+#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+// Windows Header Files
+#include <windows.h>

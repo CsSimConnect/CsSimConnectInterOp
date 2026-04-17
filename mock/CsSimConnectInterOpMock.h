@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (c) 2024. Bert Laverman
  *
@@ -14,16 +15,9 @@
  * limitations under the License.
  */
 
-#ifndef PCH_H
-#define PCH_H
+#include <vector>
 
- // add headers that you want to pre-compile here
-#include "framework.h"
+CS_SIMCONNECT_DLL_EXPORT_VOID MockClearCsConnect();
+CS_SIMCONNECT_DLL_EXPORT_VOID MockCsConnect(const char* name, uint32_t result);
 
-#include "../src/CsSimConnectInterOp.h"
-
-#include "../src/Log.h"
-
-#include "gtest/gtest.h"
-
-#endif //PCH_H
+CS_SIMCONNECT_DLL_EXPORT_VOID MockSendSimConnectMessage(HANDLE clientHandle, const std::vector<uint8_t>& data);
