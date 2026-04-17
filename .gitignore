@@ -5,6 +5,9 @@
 # Don't store build artifacts
 bin/
 out/
+artifacts/
 x64/
 x86/
 packages/
+nuget/**/obj/
+nuget/**/bin/

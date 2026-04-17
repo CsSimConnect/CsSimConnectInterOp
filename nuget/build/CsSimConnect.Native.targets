@@ -1,0 +1,19 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CsSimConnectNativeAsset Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\**\*.*" />
+  </ItemGroup>
+
+  <Target Name="CopyCsSimConnectNativeAssetsToBuildOutput" AfterTargets="Build" Condition="'@(CsSimConnectNativeAsset)' != '' and '$(OutDir)' != ''">
+    <Copy
+      SourceFiles="@(CsSimConnectNativeAsset)"
+      DestinationFiles="@(CsSimConnectNativeAsset->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyCsSimConnectNativeAssetsToPublishOutput" AfterTargets="Publish" Condition="'@(CsSimConnectNativeAsset)' != '' and '$(PublishDir)' != ''">
+    <Copy
+      SourceFiles="@(CsSimConnectNativeAsset)"
+      DestinationFiles="@(CsSimConnectNativeAsset->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+  </Target>
+</Project>

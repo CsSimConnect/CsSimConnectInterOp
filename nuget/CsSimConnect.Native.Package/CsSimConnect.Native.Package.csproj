@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoBuild>true</NoBuild>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    <EnableDefaultNoneItems>false</EnableDefaultNoneItems>
+    <IsPackable>true</IsPackable>
+    <PackageId Condition="'$(PackageId)' == ''">CsSimConnect.Native</PackageId>
+    <PackageVersion Condition="'$(PackageVersion)' == ''">0.2.0</PackageVersion>
+    <Authors>Bert Laverman</Authors>
+    <Company>CsSimConnect</Company>
+    <Description Condition="'$(PackageDescription)' == ''">Native CsSimConnect InterOp package.</Description>
+    <Description Condition="'$(PackageDescription)' != ''">$(PackageDescription)</Description>
+    <PackageTags Condition="'$(PackageTags)' == ''">SimConnect;interop;native</PackageTags>
+    <PackageReadmeFile>PackageReadme.md</PackageReadmeFile>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/CsSimConnect/CsSimConnectInterOp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/CsSimConnect/CsSimConnectInterOp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <NoWarn>NU5127;NU5128</NoWarn>
+    <NativeAssetSubdir Condition="'$(NativeAssetSubdir)' == ''">default</NativeAssetSubdir>
+  </PropertyGroup>
+
+  <Target Name="EnsureNativeBinaryExists" BeforeTargets="Pack">
+    <Error Condition="'$(NativeBinaryDir)' == ''" Text="NativeBinaryDir must point to a directory containing CsSimConnectInterOp.dll." />
+    <Error Condition="!Exists('$(NativeBinaryDir)\CsSimConnectInterOp.dll')" Text="CsSimConnectInterOp.dll was not found in $(NativeBinaryDir)." />
+  </Target>
+
+  <ItemGroup>
+    <None Include="..\PackageReadme.md" Pack="true" PackagePath="" Link="PackageReadme.md" />
+    <None Include="..\build\CsSimConnect.Native.targets" Pack="true" PackagePath="build\$(PackageId).targets" />
+    <None Include="..\build\CsSimConnect.Native.targets" Pack="true" PackagePath="buildTransitive\$(PackageId).targets" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="$(NativeBinaryDir)\CsSimConnectInterOp.dll" Pack="true" PackagePath="runtimes\win-x64\native\$(NativeAssetSubdir)\" />
+    <None Include="$(NativeBinaryDir)\CsSimConnectInterOp.pdb" Pack="true" PackagePath="runtimes\win-x64\native\$(NativeAssetSubdir)\" Condition="Exists('$(NativeBinaryDir)\CsSimConnectInterOp.pdb')" />
+  </ItemGroup>
+</Project>
